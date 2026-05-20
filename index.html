@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>NC/NV Partner Outreach Dashboard</title>
+<link rel="stylesheet" href="css/style.css"/>
+</head>
+<body>
+
+<!-- ═══ LOGIN SCREEN ═══ -->
+<div id="login-screen" class="screen active">
+  <div class="login-wrap">
+    <div class="login-logo">
+      <div class="logo-icon">🤝</div>
+      <h1>NC/NV Partner<br/>Outreach Dashboard</h1>
+      <p>Motor & Health | May 2026</p>
+    </div>
+    <div class="login-card">
+      <h2>RM Login</h2>
+      <div class="form-group">
+        <label>RM ID</label>
+        <input id="inp-rmid" type="text" placeholder="e.g. 90006986" autocomplete="username"/>
+      </div>
+      <div class="form-group">
+        <label>Password</label>
+        <input id="inp-pass" type="password" placeholder="Last 4 digits + @ncnv" autocomplete="current-password"/>
+      </div>
+      <div id="login-error" class="error-msg hidden"></div>
+      <button id="btn-login" class="btn-primary" onclick="doLogin()">Sign In →</button>
+      <div class="login-hint">
+        Default password: last 4 digits of your RM ID + <code>@ncnv</code><br/>
+        Example: RM ID 90006986 → Password: <code>6986@ncnv</code>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ MAIN DASHBOARD ═══ -->
+<div id="main-screen" class="screen">
+
+  <!-- Header -->
+  <header class="top-bar">
+    <div class="top-bar-left">
+      <span class="app-logo">🤝</span>
+      <div>
+        <div class="app-title">NC/NV Outreach Dashboard</div>
+        <div class="app-sub" id="hdr-sub">Motor & Health Partners</div>
+      </div>
+    </div>
+    <div class="top-bar-right">
+      <span id="hdr-user" class="user-badge"></span>
+      <button class="btn-ghost" id="btn-master" onclick="showMaster()" style="display:none">📊 Master</button>
+      <button class="btn-ghost" onclick="doLogout()">Sign Out</button>
+    </div>
+  </header>
+
+  <!-- Stats bar -->
+  <div class="stats-bar" id="stats-bar">
+    <div class="stat-card" id="sc-total">
+      <div class="stat-val">—</div><div class="stat-lbl">My Partners</div>
+    </div>
+    <div class="stat-card green" id="sc-called">
+      <div class="stat-val">—</div><div class="stat-lbl">Called ✓</div>
+    </div>
+    <div class="stat-card blue" id="sc-visited">
+      <div class="stat-val">—</div><div class="stat-lbl">Visited ✓</div>
+    </div>
+    <div class="stat-card gold" id="sc-prem">
+      <div class="stat-val">—</div><div class="stat-lbl">Total Premium (₹)</div>
+    </div>
+    <div class="stat-card teal" id="sc-may">
+      <div class="stat-val">—</div><div class="stat-lbl">May-26 Premium (₹)</div>
+    </div>
+    <div class="stat-card red" id="sc-t4">
+      <div class="stat-val">—</div><div class="stat-lbl">High Tier (₹10L+)</div>
+    </div>
+  </div>
+
+  <!-- Filters -->
+  <div class="filter-bar">
+    <input id="search" type="text" placeholder="🔍  Search partner name or GCD..." oninput="applyFilters()"/>
+    <select id="f-cohort" onchange="applyFilters()">
+      <option value="">All Cohorts</option>
+      <option value="TIER 4">🟢 TIER 4 — High (₹10L+)</option>
+      <option value="TIER 3">🔵 TIER 3 — Mid (₹1L–₹10L)</option>
+      <option value="TIER 2">🟣 TIER 2 — Low (₹10K–₹1L)</option>
+      <option value="TIER 1">🔴 TIER 1 — Micro (&lt;₹10K)</option>
+    </select>
+    <select id="f-status" onchange="applyFilters()">
+      <option value="">All Status</option>
+      <option value="not-called">Not Called</option>
+      <option value="called">Called ✓</option>
+      <option value="not-visited">Not Visited</option>
+      <option value="visited">Visited ✓</option>
+    </select>
+    <select id="f-zone" onchange="applyFilters()">
+      <option value="">All Zones</option>
+      <option>North</option><option>South</option>
+      <option>West</option><option>RON</option>
+      <option>East & Central</option>
+    </select>
+    <span id="result-count" class="result-count"></span>
+  </div>
+
+  <!-- Table -->
+  <div class="table-wrap">
+    <table id="partner-table">
+      <thead>
+        <tr>
+          <th>Partner Name</th>
+          <th>GCD Code</th>
+          <th>Zone / State</th>
+          <th>Tenure</th>
+          <th>Cohort</th>
+          <th class="num-col">Total Premium (₹)</th>
+          <th class="num-col">May-26 Premium (₹)</th>
+          <th class="num-col">Active Months</th>
+          <th>Call Status</th>
+          <th>Visit Status</th>
+          <th>Notes</th>
+        </tr>
+      </thead>
+      <tbody id="partner-tbody"></tbody>
+    </table>
+    <div id="empty-state" class="empty-state hidden">
+      <div style="font-size:3rem">🔍</div>
+      <div>No partners match your filters</div>
+    </div>
+    <div id="loading-state" class="loading-state">
+      <div class="spinner"></div>Loading partners...
+    </div>
+  </div>
+</div>
+
+<!-- ═══ MASTER DASHBOARD ═══ -->
+<div id="master-screen" class="screen">
+  <header class="top-bar">
+    <div class="top-bar-left">
+      <span class="app-logo">📊</span>
+      <div>
+        <div class="app-title">Master Performance Dashboard</div>
+        <div class="app-sub">All Zones · All RMs · NC/NV Partner Outreach</div>
+      </div>
+    </div>
+    <div class="top-bar-right">
+      <button class="btn-ghost" onclick="showMain()">← My Dashboard</button>
+      <button class="btn-ghost" onclick="doLogout()">Sign Out</button>
+    </div>
+  </header>
+
+  <div class="master-stats" id="master-stats"></div>
+  <div class="zone-grid" id="zone-grid"></div>
+
+  <div class="section-hdr">RM Performance — Ranked by Total Premium at Risk</div>
+  <div class="table-wrap">
+    <table id="rm-table">
+      <thead>
+        <tr>
+          <th>#</th><th>RM Name</th><th>Zone</th><th>AM Name</th>
+          <th class="num-col">Partners</th>
+          <th class="num-col">Called</th>
+          <th class="num-col">Visited</th>
+          <th class="num-col">% Called</th>
+          <th class="num-col">Total Prem (₹)</th>
+          <th class="num-col">May-26 Prem (₹)</th>
+          <th class="num-col">T4 High</th>
+          <th class="num-col">T3 Mid</th>
+        </tr>
+      </thead>
+      <tbody id="rm-tbody"></tbody>
+    </table>
+  </div>
+</div>
+
+<!-- Notes Modal -->
+<div id="notes-modal" class="modal-bg hidden" onclick="closeNotes(event)">
+  <div class="modal-box">
+    <h3>Add Notes</h3>
+    <div id="modal-partner-name" style="color:#64748b;margin-bottom:12px;font-size:14px"></div>
+    <textarea id="notes-input" rows="4" placeholder="Enter call notes, follow-up actions..."></textarea>
+    <div class="modal-actions">
+      <button class="btn-ghost" onclick="closeNotes()">Cancel</button>
+      <button class="btn-primary" onclick="saveNotes()">Save Notes</button>
+    </div>
+  </div>
+</div>
+
+<script src="js/app.js"></script>
+</body>
+</html>
